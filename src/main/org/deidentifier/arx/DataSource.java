@@ -19,7 +19,8 @@ package org.deidentifier.arx;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
-
+import com.mongodb.MongoException;
+import org.deidentifier.arx.io.*;
 import org.deidentifier.arx.io.ImportColumnCSV;
 import org.deidentifier.arx.io.ImportColumnExcel;
 import org.deidentifier.arx.io.ImportColumnJDBC;
@@ -110,6 +111,39 @@ public class DataSource {
     public static DataSource createJDBCSource(String url, String user, String password, String table) throws SQLException {
         return new DataSource(url, user, password, table);
     }
+
+    /**
+     * Creates a MongoDB data source.
+     *
+     * @param host
+     * @param port
+     * @param database
+     * @param collection
+     * @param user
+     * @param password
+     * @return
+     * @throws MongoException
+     */
+    public static DataSource createMongoSource(String host,int port,String database,String collection,String user,String password) throws MongoException
+    {
+        return new DataSource(host,port,database,collection,user,password);
+    }
+
+    /**
+     * Creates a MongoDB data source.
+     *
+     * @param host
+     * @param port
+     * @param database
+     * @param collection
+     * @return
+     * @throws MongoException
+     */
+    public static DataSource createMongoSource(String host,int port,String database,String collection) throws MongoException
+    {
+        return new DataSource(host,port,database,collection);
+    }
+
     
     /** The config. */
     private final ImportConfiguration config;
@@ -159,7 +193,35 @@ public class DataSource {
     private DataSource(String url, String user, String password, String table) throws SQLException {
         config = new ImportConfigurationJDBC(url, user, password, table);
     }
-    
+
+    /** Creates a MongoDB data source.
+     *
+     * @param host
+     * @param port
+     * @param database
+     * @param collection
+     * @param user
+     * @param password
+     * @return
+     */
+    private DataSource(String host,int port,String database,String collection,String user,String password)
+    {
+        config = new ImportConfigurationMongo(host,port,database,collection);
+    }
+
+    /** Creates a MongoDB data source.
+     *
+     * @param host
+     * @param port
+     * @param database
+     * @param collection
+     * @return
+     */
+    private DataSource(String host,int port,String database,String collection)
+    {
+        config = new ImportConfigurationMongo(host,port,database,collection);
+    }
+
     /**
      * Adds a new column.
      *
@@ -268,6 +330,8 @@ public class DataSource {
             config.addColumn(new ImportColumnExcel(name, datatype));
         } else if (config instanceof ImportConfigurationJDBC) {
             config.addColumn(new ImportColumnJDBC(name, datatype));
+        } else if (config instanceof ImportConfigurationMongo) {
+            config.addColumn(new ImportItemMongo(name, datatype));
         }
     }
     
@@ -285,6 +349,8 @@ public class DataSource {
             config.addColumn(new ImportColumnExcel(name, datatype, cleansing));
         } else if (config instanceof ImportConfigurationJDBC) {
             config.addColumn(new ImportColumnJDBC(name, datatype, cleansing));
+        }else if (config instanceof ImportConfigurationMongo) {
+            config.addColumn(new ImportItemMongo(name, datatype,cleansing));
         }
     }
     
@@ -312,6 +378,8 @@ public class DataSource {
             config.addColumn(new ImportColumnExcel(name, alias, datatype));
         } else if (config instanceof ImportConfigurationJDBC) {
             config.addColumn(new ImportColumnJDBC(name, alias, datatype));
+        }else if (config instanceof ImportConfigurationMongo) {
+            config.addColumn(new ImportItemMongo(name, alias, datatype));
         }
     }
     
@@ -329,6 +397,8 @@ public class DataSource {
             config.addColumn(new ImportColumnExcel(name, alias, datatype, cleansing));
         } else if (config instanceof ImportConfigurationJDBC) {
             config.addColumn(new ImportColumnJDBC(name, alias, datatype, cleansing));
+        }else if (config instanceof ImportConfigurationMongo) {
+            config.addColumn(new ImportItemMongo(name,alias, datatype,cleansing));
         }
     }
     

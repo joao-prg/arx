@@ -163,6 +163,7 @@ public abstract class Data {
 
         ImportConfiguration config = source.getConfiguration();
         ImportAdapter adapter = ImportAdapter.create(config);
+        //System.out.println(adapter.hasNext());
         return create(adapter);
     }
 
@@ -358,7 +359,7 @@ public abstract class Data {
         IterableData result = new IterableData(iterator);
 
         // Update definition, if needed
-        if (iterator instanceof ImportAdapter) {
+       if (iterator instanceof ImportAdapter) {
             result.getDefinition().parse((ImportAdapter) iterator);
         }
 

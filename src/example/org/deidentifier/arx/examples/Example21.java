@@ -20,10 +20,10 @@ package org.deidentifier.arx.examples;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataSource;
 import org.deidentifier.arx.DataType;
+import com.mongodb.Mongo;
 
 /**
  * This class demonstrates the use of the data import facilities provided by the
@@ -50,9 +50,10 @@ public class Example21 extends Example {
                                            SQLException,
                                            ClassNotFoundException {
                                            
-        exampleCSV();
-        exampleExcel();
+        //exampleCSV();
+        //exampleExcel();
         exampleJDBC();
+        exampleMongo();
     }
     
     /**
@@ -158,14 +159,13 @@ public class Example21 extends Example {
                                       ClassNotFoundException {
                                       
         // Load JDBC driver
-        Class.forName("org.sqlite.JDBC");
+        Class.forName("com.mysql.jdbc.Driver");
         
         // Configuration for JDBC source
-        DataSource source = DataSource.createJDBCSource("jdbc:sqlite:data/test.db",
-                                                        "test");
+        DataSource source = DataSource.createJDBCSource("jdbc:mysql://localhost:3306/test","root","root","test");
                                                         
         // Add columns
-        source.addColumn(2, DataType.STRING); // zipcode (index based addressing)
+        source.addColumn(0, DataType.STRING); // zipcode (index based addressing)
         source.addColumn("gender", DataType.STRING); // gender (named addressing)
         source.addColumn("age", "renamed", DataType.INTEGER); // age (named addressing + alias name)
         
@@ -173,6 +173,17 @@ public class Example21 extends Example {
         Data data = Data.create(source);
         
         // Print to console
+        print(data.getHandle());
+        System.out.println("\n");
+    }
+
+    private static void exampleMongo() throws ClassNotFoundException, IOException
+    {
+        Class.forName("com.mongodb.Mongo");
+        DataSource source = DataSource.createMongoSource("localhost",27017,"test","users");
+        source.addColumn("age","age",DataType.STRING);
+        source.addColumn("name","name",DataType.STRING);
+        Data data = Data.create(source);
         print(data.getHandle());
         System.out.println("\n");
     }

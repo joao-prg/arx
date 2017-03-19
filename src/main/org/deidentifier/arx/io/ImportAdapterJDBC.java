@@ -110,7 +110,6 @@ public class ImportAdapterJDBC extends ImportAdapter {
             statement.execute("SELECT * FROM " + config.getTable());
             resultSet = statement.getResultSet();
             hasNext = resultSet.next();
-            
         } catch (SQLException e) {
             closeResources();
             throw new IOException(e.getMessage());

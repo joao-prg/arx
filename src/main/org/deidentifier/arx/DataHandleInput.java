@@ -61,7 +61,7 @@ public class DataHandleInput extends DataHandle {
         
         // Obtain and check iterator
         final Iterator<String[]> iterator = data.iterator();
-        if (!iterator.hasNext()) { 
+        if (!iterator.hasNext()) {
             throw new IllegalArgumentException("Data object is empty!"); 
         }
 

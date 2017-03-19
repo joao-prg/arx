@@ -56,7 +56,10 @@ abstract public class ImportAdapter implements Iterator<String[]> {
             return new ImportAdapterExcel((ImportConfigurationExcel) config);
         } else if (config instanceof ImportConfigurationJDBC) {
             return new ImportAdapterJDBC((ImportConfigurationJDBC) config);
-        } else {
+        }else if (config instanceof ImportConfigurationMongo) {
+            return new ImportAdapterMongo((ImportConfigurationMongo) config);
+        }
+        else {
             throw new IllegalArgumentException("No adapter defined for this type of configuration");
         }
     }
