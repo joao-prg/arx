@@ -3,13 +3,13 @@ package org.deidentifier.arx.io;
 import org.deidentifier.arx.DataType;
 
 /**
- * Represents a single Mongo data item
+ * Represents a single Cassandra data column
  *
- * MongoDB items can be referred to by name ({@link IImportColumnNamed}.
+ * Cassandra columns can be referred to by name ({@link IImportColumnNamed}.
  *
  * @author João Gonçalves
  */
-public class ImportItemMongo extends ImportColumn implements IImportColumnNamed
+public class ImportColumnCassandra extends ImportColumn implements IImportColumnNamed
 {
     /** Name this item refers to. */
     private String name;
@@ -21,7 +21,7 @@ public class ImportItemMongo extends ImportColumn implements IImportColumnNamed
      * @param name
      * @param datatype
      */
-    public ImportItemMongo(String name, DataType<?> datatype) {
+    public ImportColumnCassandra(String name, DataType<?> datatype) {
         this(name, datatype, false);
     }
 
@@ -32,7 +32,7 @@ public class ImportItemMongo extends ImportColumn implements IImportColumnNamed
      * @param datatype
      * @param cleansing
      */
-    public ImportItemMongo(String name, DataType<?> datatype, boolean cleansing) {
+    public ImportColumnCassandra(String name, DataType<?> datatype, boolean cleansing) {
         super(name, datatype, cleansing);
         setName(name);
     }
@@ -44,7 +44,7 @@ public class ImportItemMongo extends ImportColumn implements IImportColumnNamed
      * @param aliasName
      * @param datatype
      */
-    public ImportItemMongo(String name, String aliasName, DataType<?> datatype) {
+    public ImportColumnCassandra(String name, String aliasName, DataType<?> datatype) {
         this(name, aliasName, datatype, false);
     }
 
@@ -56,7 +56,7 @@ public class ImportItemMongo extends ImportColumn implements IImportColumnNamed
      * @param datatype
      * @param cleansing
      */
-    public ImportItemMongo(String name, String aliasName, DataType<?> datatype, boolean cleansing) {
+    public ImportColumnCassandra(String name, String aliasName, DataType<?> datatype, boolean cleansing) {
         super(aliasName, datatype, cleansing);
         setName(name);
     }

@@ -144,6 +144,36 @@ public class DataSource {
         return new DataSource(host,port,database,collection);
     }
 
+    /**
+     * Creates a Cassandra data source.
+     *
+     * @param host
+     * @param cluster
+     * @param table
+     * @param user
+     * @param password
+     * @return
+     */
+
+    public static DataSource createCassandraSource(String host,String cluster,String table,String user,String password)
+    {
+        return new DataSource(host,cluster,table,user,password);
+    }
+
+    /**
+     * Creates a Cassandra data source.
+     *
+     * @param host
+     * @param cluster
+     * @param table
+     * @return
+     */
+
+    public static DataSource createCassandraSource(String host,String cluster,String table)
+    {
+        return new DataSource(host,cluster,table);
+    }
+
     
     /** The config. */
     private final ImportConfiguration config;
@@ -220,6 +250,37 @@ public class DataSource {
     private DataSource(String host,int port,String database,String collection)
     {
         config = new ImportConfigurationMongo(host,port,database,collection);
+    }
+
+
+    /**
+     * Creates a Cassandra data source.
+     *
+     * @param host
+     * @param cluster
+     * @param table
+     * @param user
+     * @param password
+     * @return
+     */
+
+    private DataSource(String host,String cluster,String table,String user, String password)
+    {
+        config = new ImportConfigurationCassandra(host,cluster,table,user,password);
+    }
+
+    /**
+     * Creates a Cassandra data source.
+     *
+     * @param host
+     * @param cluster
+     * @param table
+     * @return
+     */
+
+    private DataSource(String host,String cluster,String table)
+    {
+        config = new ImportConfigurationCassandra(host,cluster,table);
     }
 
     /**
@@ -332,6 +393,8 @@ public class DataSource {
             config.addColumn(new ImportColumnJDBC(name, datatype));
         } else if (config instanceof ImportConfigurationMongo) {
             config.addColumn(new ImportItemMongo(name, datatype));
+        }else if (config instanceof ImportConfigurationCassandra) {
+            config.addColumn(new ImportColumnCassandra(name, datatype));
         }
     }
     
@@ -351,6 +414,8 @@ public class DataSource {
             config.addColumn(new ImportColumnJDBC(name, datatype, cleansing));
         }else if (config instanceof ImportConfigurationMongo) {
             config.addColumn(new ImportItemMongo(name, datatype,cleansing));
+        }else if (config instanceof ImportConfigurationCassandra) {
+            config.addColumn(new ImportColumnCassandra(name, datatype));
         }
     }
     
@@ -380,6 +445,8 @@ public class DataSource {
             config.addColumn(new ImportColumnJDBC(name, alias, datatype));
         }else if (config instanceof ImportConfigurationMongo) {
             config.addColumn(new ImportItemMongo(name, alias, datatype));
+        }else if (config instanceof ImportConfigurationCassandra) {
+            config.addColumn(new ImportColumnCassandra(name, datatype));
         }
     }
     
@@ -399,6 +466,8 @@ public class DataSource {
             config.addColumn(new ImportColumnJDBC(name, alias, datatype, cleansing));
         }else if (config instanceof ImportConfigurationMongo) {
             config.addColumn(new ImportItemMongo(name,alias, datatype,cleansing));
+        }else if (config instanceof ImportConfigurationCassandra) {
+            config.addColumn(new ImportColumnCassandra(name, datatype));
         }
     }
     

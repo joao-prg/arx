@@ -163,7 +163,6 @@ public abstract class Data {
 
         ImportConfiguration config = source.getConfiguration();
         ImportAdapter adapter = ImportAdapter.create(config);
-        //System.out.println(adapter.hasNext());
         return create(adapter);
     }
 

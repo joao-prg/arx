@@ -30,7 +30,7 @@ public class ImportConfigurationMongo extends ImportConfiguration
     private String collection;
 
     /**
-     * Determines whether we need to manage the JDBC connection.
+     * Determines whether we need to manage the Cassandra connection.
      */
     private final boolean manageConnection;
 

@@ -52,8 +52,9 @@ public class Example21 extends Example {
                                            
         //exampleCSV();
         //exampleExcel();
-        exampleJDBC();
-        exampleMongo();
+        //exampleJDBC();
+        //exampleMongo();
+        exampleCassandra();
     }
     
     /**
@@ -183,6 +184,16 @@ public class Example21 extends Example {
         DataSource source = DataSource.createMongoSource("localhost",27017,"test","users");
         source.addColumn("age","age",DataType.STRING);
         source.addColumn("name","name",DataType.STRING);
+        Data data = Data.create(source);
+        print(data.getHandle());
+        System.out.println("\n");
+    }
+
+    public static void exampleCassandra() throws IOException, ClassNotFoundException
+    {
+        DataSource source = DataSource.createCassandraSource("127.0.0.1","test","users");
+        source.addColumn("age","age",DataType.STRING);
+        source.addColumn("zipcode","zipcode",DataType.STRING);
         Data data = Data.create(source);
         print(data.getHandle());
         System.out.println("\n");
