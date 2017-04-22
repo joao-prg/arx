@@ -123,7 +123,10 @@ public class ImportAdapterCassandra extends ImportAdapter
             Row row = iterator.next();
             for(int i=0;i<header.length;i++)
             {
-                result[i] = row.getObject(header[i]).toString();
+                if(row.getObject(header[i])==null)
+                    result[i] = "";
+                else
+                    result[i] = row.getObject(header[i]).toString();
             }
             /* Move cursor forward and assign result to {@link #hasNext} */
             hasNext = iterator.hasNext();
