@@ -43,7 +43,7 @@ public class ImportConfigurationCassandra extends ImportConfiguration
      */
     public ImportConfigurationCassandra(String host,String clusterName,String table,String user,String password)
     {
-        this.cluster = Cluster.builder().addContactPoint(host).withSocketOptions(new SocketOptions().setReadTimeoutMillis(50000)).build();
+        this.cluster = Cluster.builder().addContactPoint(host).withSocketOptions(new SocketOptions().setReadTimeoutMillis(3600000)).build();
         this.session = this.cluster.connect(clusterName);
         this.session.execute("USE " + clusterName);
         this.table = table;
@@ -57,7 +57,7 @@ public class ImportConfigurationCassandra extends ImportConfiguration
      */
     public ImportConfigurationCassandra(String host,String clusterName,String table)
     {
-        this.cluster = Cluster.builder().addContactPoint(host).withSocketOptions(new SocketOptions().setReadTimeoutMillis(50000)).build();
+        this.cluster = Cluster.builder().addContactPoint(host).withSocketOptions(new SocketOptions().setReadTimeoutMillis(3600000)).build();
         this.session = this.cluster.connect(clusterName);
         this.session.execute("USE " + clusterName);
         this.table = table;
