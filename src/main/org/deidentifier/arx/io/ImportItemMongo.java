@@ -3,7 +3,7 @@ package org.deidentifier.arx.io;
 import org.deidentifier.arx.DataType;
 
 /**
- * Represents a single Mongo data item
+ * Represents a single MongoDB data item
  *
  * MongoDB items can be referred to by name ({@link IImportColumnNamed}.
  *

@@ -696,8 +696,7 @@ public class DataDefinition implements Cloneable{
     protected void parse(ImportAdapter adapter) {
         String[] header = adapter.getHeader();
         ImportConfiguration config = adapter.getConfig();
-        for (int i=0; i<config.getColumns().size(); i++)
-        {
+        for (int i=0; i<config.getColumns().size(); i++) {
             this.setDataType(header[i], config.getColumns().get(i).getDataType());
         }
     }

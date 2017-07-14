@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Import adapter for MongoDB
+ * Import adapter for Cassandra
  *
  * This adapter can import data from Cassandra sources. The source itself is
  * described by an appropriate {@link ImportConfigurationCassandra} object.
@@ -151,7 +151,7 @@ public class ImportAdapterCassandra extends ImportAdapter
     }
 
     /**
-     * Closes the JDBC resources.
+     * Closes the Cassandra resources.
      */
     private void closeResources()
     {

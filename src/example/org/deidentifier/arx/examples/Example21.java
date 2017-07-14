@@ -178,6 +178,14 @@ public class Example21 extends Example {
         System.out.println("\n");
     }
 
+    /**
+     * This method demonstrates the import of data from a MongoDB data source.
+     *
+     * @throws IOException
+     *             In case of IO errors with the given file
+     * @throws ClassNotFoundException
+     *             In case there is no MongoDB driver
+     */
     private static void exampleMongo() throws ClassNotFoundException, IOException
     {
         Class.forName("com.mongodb.Mongo");
@@ -189,6 +197,14 @@ public class Example21 extends Example {
         System.out.println("\n");
     }
 
+    /**
+     * This method demonstrates the import of data from a Cassandra data source.
+     *
+     * @throws IOException
+     *             In case of IO errors with the given file
+     * @throws ClassNotFoundException
+     *             In case there is no MongoDB driver
+     */
     public static void exampleCassandra() throws IOException, ClassNotFoundException
     {
         DataSource source = DataSource.createCassandraSource("127.0.0.1","test","users");

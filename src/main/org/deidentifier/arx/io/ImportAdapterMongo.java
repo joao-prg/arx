@@ -3,12 +3,9 @@ package org.deidentifier.arx.io;
 import com.mongodb.*;
 import com.mongodb.client.*;
 import org.bson.*;
-import org.bson.conversions.Bson;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import static com.mongodb.client.model.Projections.*;
 
 /**
@@ -25,14 +22,14 @@ public class ImportAdapterMongo extends ImportAdapter
     private ImportConfigurationMongo config;
 
     /**
-     * ResultSet containing documents to return.
+     * MongoCursor containing documents to return.
      *
      * @see {@link #next()}
      */
     private MongoCursor<Document> mc;
 
 
-    /** Indicates whether there is another documentto return. */
+    /** Indicates whether there is another document to return. */
     private boolean hasNext;
 
     /**
@@ -137,7 +134,7 @@ public class ImportAdapterMongo extends ImportAdapter
     }
 
     /**
-     * Closes the JDBC resources.
+     * Closes the MongoDB resources.
      */
     private void closeResources()
     {
