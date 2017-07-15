@@ -63,6 +63,7 @@ public class Example54 extends Example
     public static void main(String[] args)
     {
         connectDB();
+        Data data = createDataSource();
         for(int i=0;i<genLevels.length;i++)
         {
             for(int j=0;j<epsilons.length;j++)
@@ -75,9 +76,11 @@ public class Example54 extends Example
                         {
                             for(int n=0;n<tValues.length;n++)
                             {
-                                for(int o=0;o<repetitions;o++)
+                                for(int o=1;o<=repetitions;o++)
                                 {
-                                    anonymizeVoters(populationSize,epsilons[j],deltas[k],riskThresholds[l],outliers[m],tValues[n],genLevels[i]);
+                                    System.out.println("Initializing...repetition="+o +",epsilon=" + epsilons[j] + ",delta=" + deltas[k] + ",threshold=" + riskThresholds[l]
+                                            + ",outlier=" + outliers[m] + ",t-value=" + tValues[n] + ",generalization level=" + genLevels[i] +".");
+                                    anonymizeVoters(data,populationSize,epsilons[j],deltas[k],riskThresholds[l],outliers[m],tValues[n],genLevels[i]);
                                 }
                             }
                         }
@@ -115,7 +118,7 @@ public class Example54 extends Example
                 connection = DriverManager.getConnection(DATABASE_URL, properties);
             } catch (ClassNotFoundException | SQLException e)
             {
-                System.out.println("Error connecting to MySQL database.");
+                System.out.println("Error connecting to the MySQL database.");
                 exit(1);
             }
         }
@@ -127,7 +130,7 @@ public class Example54 extends Example
      * @param epsilon
      *              the epsilon value used in differential privacy
      * @param delta
-     *              the delta value used in  differential privacy
+     *              the delta value used in differential privacy
      * @param threshold
      *              acceptable highest probability of re-identification for a single record
      * @param maxOutliers
@@ -145,9 +148,9 @@ public class Example54 extends Example
      * @param uniqueRecords
      *              number of unique records obtained in the MySQL database
      * @param optimalGen
-     *              optimal generalization of quasi-identifier attributes
+     *              optimal generalization of the quasi-identifier attributes
      * @param queryResult
-     *              results of the 4 queries executed against anonymized dataset
+     *              results of the 4 queries executed against the anonymized dataset
      */
     public static void writeToFile(double epsilon,double delta,double threshold,double maxOutliers,double tValue,double time,String maxInfoLoss,String minInfoLoss,String genLevel,int uniqueRecords,String optimalGen,String queryResult)
     {
@@ -172,7 +175,7 @@ public class Example54 extends Example
 
 
     /**
-     * This method gets the risk metrics and can print them.
+     * This method gets the risk metrics.
      * @param data
      *              data for which metrics will be obtained
      * @param  populationModel
@@ -180,12 +183,38 @@ public class Example54 extends Example
      * @param threshold
      *              acceptable highest probability of re-identification for a single record
      */
-    public static void printMetrics(DataHandle data,ARXPopulationModel populationModel,double threshold)
+    public static void getMetrics(DataHandle data,ARXPopulationModel populationModel,double threshold)
     {
         RiskEstimateBuilder riskEstimator = data.getRiskEstimator(populationModel);
         RiskModelSampleSummary riskModelSampleSummary = riskEstimator.getSampleBasedRiskSummary(threshold);
+        //get risk estimator metrics
+        numUniques = riskEstimator.getSampleBasedUniquenessRisk().getNumUniqueTuples();
+        averageRisk = riskEstimator.getSampleBasedReidentificationRisk().getAverageRisk();
+        journalistRisk = riskEstimator.getSampleBasedReidentificationRisk().getEstimatedJournalistRisk();
+        marketerRisk = riskEstimator.getSampleBasedReidentificationRisk().getEstimatedMarketerRisk();
+        prosecutorRisk = riskEstimator.getSampleBasedReidentificationRisk().getEstimatedProsecutorRisk();
+        highestRisk = riskEstimator.getSampleBasedReidentificationRisk().getHighestRisk();
+        nHighestRisk = riskEstimator.getSampleBasedReidentificationRisk().getNumTuplesAffectedByHighestRisk();
+        //get risk model sample summary metrics
+        journalistRecordsRisk=riskModelSampleSummary.getJournalistRisk().getRecordsAtRisk();
+        journalistHighestRisk = riskModelSampleSummary.getJournalistRisk().getHighestRisk();
+        journalistSuccessRate=riskModelSampleSummary.getJournalistRisk().getSuccessRate();
+        prosecutorRecordsRisk=riskModelSampleSummary.getProsecutorRisk().getRecordsAtRisk();
+        prosecutorHighestRisk=riskModelSampleSummary.getProsecutorRisk().getHighestRisk();
+        prosecutorSuccessRate=riskModelSampleSummary.getProsecutorRisk().getSuccessRate();
+        marketerSuccessRate=riskModelSampleSummary.getMarketerRisk().getSuccessRate();
+    }
+
+    /**
+     * This method prints the risk metrics.
+     * @param data
+     *              data for which metrics will be obtained
+     * @param  populationModel
+     *              population for which metrics will be obtained
+     */
+    public static void printMetrics(DataHandle data,ARXPopulationModel populationModel)
+    {
         //print quasi identifiers distinction and separation
-        /*
         for(RiskModelAttributes.QuasiIdentifierRisk qi: data.getRiskEstimator(populationModel).getAttributeRisks().getAttributeRisks())
         {
             for(int i=0;i<qi.getIdentifier().size();i++)
@@ -197,16 +226,7 @@ public class Example54 extends Example
             }
             System.out.println(" distinction: " + qi.getDistinction() + ", separation: " + qi.getSeparation());
         }
-        */
         //print risk estimator metrics
-        numUniques = riskEstimator.getSampleBasedUniquenessRisk().getNumUniqueTuples();
-        averageRisk = riskEstimator.getSampleBasedReidentificationRisk().getAverageRisk();
-        journalistRisk = riskEstimator.getSampleBasedReidentificationRisk().getEstimatedJournalistRisk();
-        marketerRisk = riskEstimator.getSampleBasedReidentificationRisk().getEstimatedMarketerRisk();
-        prosecutorRisk = riskEstimator.getSampleBasedReidentificationRisk().getEstimatedProsecutorRisk();
-        highestRisk = riskEstimator.getSampleBasedReidentificationRisk().getHighestRisk();
-        nHighestRisk = riskEstimator.getSampleBasedReidentificationRisk().getNumTuplesAffectedByHighestRisk();
-        /*
         System.out.println("\n");
         System.out.println("Number of uniques: " + numUniques);
         System.out.println("Average risk: " + averageRisk);
@@ -215,16 +235,7 @@ public class Example54 extends Example
         System.out.println("Prosecutor re-identification risk: " + prosecutorRisk);
         System.out.println("Highest Risk: " + highestRisk);
         System.out.println("Number of tuples affected by highest risk: " + nHighestRisk);
-        */
         //print risk model sample summary metrics
-        journalistRecordsRisk=riskModelSampleSummary.getJournalistRisk().getRecordsAtRisk();
-        journalistHighestRisk = riskModelSampleSummary.getJournalistRisk().getHighestRisk();
-        journalistSuccessRate=riskModelSampleSummary.getJournalistRisk().getSuccessRate();
-        prosecutorRecordsRisk=riskModelSampleSummary.getProsecutorRisk().getRecordsAtRisk();
-        prosecutorHighestRisk=riskModelSampleSummary.getProsecutorRisk().getHighestRisk();
-        prosecutorSuccessRate=riskModelSampleSummary.getProsecutorRisk().getSuccessRate();
-        marketerSuccessRate=riskModelSampleSummary.getMarketerRisk().getSuccessRate();
-        /*
         System.out.println("Journalist attacker model-Records at risk: " + journalistRecordsRisk);
         System.out.println("Journalist attacker model-Highest risk: " + journalistHighestRisk);
         System.out.println("Journalist attacker model-Success rate: " + journalistSuccessRate);
@@ -232,7 +243,6 @@ public class Example54 extends Example
         System.out.println("Prosecutor attacker model-Highest risk: " + prosecutorHighestRisk);
         System.out.println("Prosecutor attacker model-Success rate: " + prosecutorSuccessRate);
         System.out.println("Marketer attacker model-Success rate: " + marketerSuccessRate);
-        */
     }
 
     /**
@@ -335,7 +345,7 @@ public class Example54 extends Example
         }
         catch(Exception e)
         {
-            System.out.println("Error loading 'current.csv' to MySQL database.");
+            System.out.println("Error loading 'current.csv' to the MySQL database.");
         }
         query = "select count(distinct voter_stat,city,zip_code,race_code,ethnic_code,party_cd,gender_code,birth_place,drivers_lic,age) from voters_anon;";
         try
@@ -355,11 +365,11 @@ public class Example54 extends Example
     }
 
     /**
-     * This method gets the optimal generalization for quasi-identifier attributes(city,voter_stat,birth_place and zip_code).
+     * This method gets the optimal generalization for the quasi-identifier attributes(city,voter_stat,birth_place and zip_code).
      * @param result
      *              result of the anonymization
      * @param data
-     *              configuration of the data for which optimal generalization will be obtained
+     *              data(and its configuration) for which optimal generalization will be obtained
      * @return      string with optimal generalization for each quasi-identifier attribute, separated by commas
      */
     public static String getOptimalGeneralization(final ARXResult result, final Data data)
@@ -381,29 +391,14 @@ public class Example54 extends Example
 
 
     /**
-     * Method responsible for construct the data source and anonymize it.
-     * @param  populationSize
-     *              size of the population that is in the dataset
-     * @param epsilon
-     *              the epsilon value used in differential privacy
-     * @param delta
-     *              the delta value to use for differential privacy
-     * @param threshold
-     *              acceptable highest probability of re-identification for a single record
-     * @param maxOutliers
-     *              maximum number of allowed outliers
-     * @param tValue
-     *              t value used in t-closeness
-     * @param genLevel
-     *              generalization level used
+     * This method creates the data source.
+     * @return      data source
      */
-    public static void anonymizeVoters(int populationSize,double epsilon, double delta,double threshold,double maxOutliers,double tValue,String genLevel)
+    public static Data createDataSource()
     {
-        System.out.println("Getting ready...");
-        Data data = null;
+        System.out.println("Creating data source...");
+        Data data=null;
         AttributeType.Hierarchy voterStatHierarchy= null,zipCodeHierarchy= null,cityHierarchy= null,birthStateHierarchy= null;
-        ARXResult result = null;
-        EDDifferentialPrivacy criterion;
         //establish cassandra connection
         DataSource source = DataSource.createCassandraSource("127.0.0.1","test","voters");
         //add columns
@@ -427,7 +422,6 @@ public class Example54 extends Example
             System.out.println("Error creating data source.");
             exit(1);
         }
-        ARXPopulationModel populationModel = ARXPopulationModel.create(populationSize);
         //build hierarchies for each quasi-identifier attribute
         try
         {
@@ -457,6 +451,33 @@ public class Example54 extends Example
         data.getDefinition().setHierarchy("zip_code", zipCodeHierarchy);
         data.getDefinition().setHierarchy("city", cityHierarchy);
         data.getDefinition().setHierarchy("birth_place",birthStateHierarchy);
+        return data;
+    }
+
+
+    /**
+     * Method responsible for construct the data source and anonymize it.
+     * @param  populationSize
+     *              size of the population that is in the dataset
+     * @param epsilon
+     *              the epsilon value used in differential privacy
+     * @param delta
+     *              the delta value used in differential privacy
+     * @param threshold
+     *              acceptable highest probability of re-identification for a single record
+     * @param maxOutliers
+     *              maximum number of allowed outliers
+     * @param tValue
+     *              t value used in t-closeness
+     * @param genLevel
+     *              generalization level used
+     */
+    public static void anonymizeVoters(Data data,int populationSize,double epsilon, double delta,double threshold,double maxOutliers,double tValue,String genLevel)
+    {
+        System.out.println("Getting ready...");
+        ARXResult result = null;
+        EDDifferentialPrivacy criterion;
+        ARXPopulationModel populationModel = ARXPopulationModel.create(populationSize);
         // Create an instance of the anonymizer
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         // Create a differential privacy criterion (epsilon,delta)
@@ -481,9 +502,8 @@ public class Example54 extends Example
         config.addCriterion(new EqualDistanceTCloseness("party_cd",tValue));
         config.addCriterion(new EqualDistanceTCloseness("gender_code",tValue));
         config.addCriterion(new EqualDistanceTCloseness("drivers_lic",tValue));
-        //print input metrics
-        //System.out.println("-------------------------INPUT-------------------------\n\n");
-        printMetrics(data.getHandle(),populationModel,threshold);
+        //get input metrics
+        //getMetrics(data.getHandle(),populationModel,threshold);
         //anonymize input
         System.out.println("Starting anonymization...");
         try
@@ -495,11 +515,11 @@ public class Example54 extends Example
             exit(1);
         }
         DataHandle optimal = result.getOutput();
-        //print output metrics
-        //System.out.println("\n\n-------------------------OUTPUT-------------------------\n\n");
-        printMetrics(optimal,populationModel,threshold);
+        //get output metrics
+        getMetrics(optimal,populationModel,threshold);
         //write execution result to file
         System.out.println("Writing execution result to file...");
         writeToFile(epsilon,delta,threshold,maxOutliers,tValue,result.getTime()/1000d,result.getGlobalOptimum().getMaximumInformationLoss().toString(),result.getGlobalOptimum().getMinimumInformationLoss().toString(),genLevel,getUniqueRecords(optimal),getOptimalGeneralization(result,data),getQueryResults());
+        data.getHandle().release();
     }
 }
