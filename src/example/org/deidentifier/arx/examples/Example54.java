@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Properties;
 import org.deidentifier.arx.*;
 import org.deidentifier.arx.criteria.EDDifferentialPrivacy;
-import org.deidentifier.arx.criteria.EqualDistanceTCloseness;
 import org.deidentifier.arx.risk.*;
 import static java.lang.System.exit;
 
@@ -64,7 +63,7 @@ public class Example54 extends Example
     {
         connectDB();
         Data data = createDataSource();
-        for(int i=0;i<genLevels.length;i++)
+        /*for(int i=0;i<genLevels.length;i++)
         {
             for(int j=0;j<epsilons.length;j++)
             {
@@ -87,7 +86,8 @@ public class Example54 extends Example
                     }
                 }
             }
-        }
+        }*/
+        anonymizeVoters(data,populationSize,0.2,0.01,0.03,1d,0.2,"LOW");
         try
         {
             connection.close();
@@ -347,7 +347,7 @@ public class Example54 extends Example
         {
             System.out.println("Error loading 'current.csv' to the MySQL database.");
         }
-        query = "select count(distinct voter_stat,city,zip_code,race_code,ethnic_code,party_cd,gender_code,birth_place,drivers_lic,age) from voters_anon;";
+        query = "select count(distinct voter_stat,city,zip_code,race_code,ethnic_code,party_cd,gender_code,birth_place,drivers_lic) from voters_anon;";
         try
         {
             stmt = (Statement) connection.createStatement();
@@ -360,7 +360,7 @@ public class Example54 extends Example
         {
             System.out.println("Error counting number of unique records.");
         }
-        newFile.delete();
+        //newFile.delete();
         return uniqueRecords;
     }
 
@@ -398,11 +398,11 @@ public class Example54 extends Example
     {
         System.out.println("Creating data source...");
         Data data=null;
-        AttributeType.Hierarchy voterStatHierarchy= null,zipCodeHierarchy= null,cityHierarchy= null,birthStateHierarchy= null;
+        AttributeType.Hierarchy voterStatHierarchy= null,zipCodeHierarchy= null,cityHierarchy= null,birthStateHierarchy= null,raceCodeHierarchy=null,ethnicCodeHierarchy=null,partyCdHierarchy=null,genderCodeHierarchy=null,driversLicHierarchy=null;
         //establish cassandra connection
         DataSource source = DataSource.createCassandraSource("127.0.0.1","test","voters");
         //add columns
-        source.addColumn("id","id",DataType.INTEGER);
+        //source.addColumn("id","id",DataType.INTEGER);
         source.addColumn("voter_stat","voter_stat",DataType.STRING);
         source.addColumn("city","city",DataType.STRING);
         source.addColumn("zip_code","zip_code",DataType.STRING);
@@ -426,31 +426,41 @@ public class Example54 extends Example
         try
         {
             voterStatHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/voter_stat_hierarchy.csv"), StandardCharsets.UTF_8,',');
-            zipCodeHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/zipcode_hierarchy.csv"), StandardCharsets.UTF_8,',');
             cityHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/cities_hierarchy.csv"), StandardCharsets.UTF_8,',');
+            zipCodeHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/zipcode_hierarchy.csv"), StandardCharsets.UTF_8,',');
+            raceCodeHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/race_code_hierarchy.csv"), StandardCharsets.UTF_8,',');
+            ethnicCodeHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/ethnic_code_hierarchy.csv"), StandardCharsets.UTF_8,',');
+            partyCdHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/party_cd_hierarchy.csv"), StandardCharsets.UTF_8,',');
+            genderCodeHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/gender_code_hierarchy.csv"), StandardCharsets.UTF_8,',');
             birthStateHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/birth_state_hierarchy.csv"), StandardCharsets.UTF_8,',');
+            driversLicHierarchy = AttributeType.Hierarchy.create(new File("src/voters_hierarchies/drivers_lic_hierarchy.csv"), StandardCharsets.UTF_8,',');
         } catch (IOException e)
         {
             System.out.println("Error creating hierarchies.");
             exit(1);
         }
         //set type of each attribute(insensitive, sensitive, quasi-identifier or identifier)
-        data.getDefinition().setAttributeType("id", AttributeType.INSENSITIVE_ATTRIBUTE);
+        //data.getDefinition().setAttributeType("id", AttributeType.INSENSITIVE_ATTRIBUTE);
         data.getDefinition().setAttributeType("voter_stat", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
         data.getDefinition().setAttributeType("city", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
         data.getDefinition().setAttributeType("zip_code", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
-        data.getDefinition().setAttributeType("race_code", AttributeType.SENSITIVE_ATTRIBUTE);
-        data.getDefinition().setAttributeType("ethnic_code", AttributeType.SENSITIVE_ATTRIBUTE);
-        data.getDefinition().setAttributeType("party_cd", AttributeType.SENSITIVE_ATTRIBUTE);
-        data.getDefinition().setAttributeType("gender_code", AttributeType.SENSITIVE_ATTRIBUTE);
+        data.getDefinition().setAttributeType("race_code", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
+        data.getDefinition().setAttributeType("ethnic_code", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
+        data.getDefinition().setAttributeType("party_cd", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
+        data.getDefinition().setAttributeType("gender_code", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
         data.getDefinition().setAttributeType("birth_place", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
-        data.getDefinition().setAttributeType("drivers_lic", AttributeType.SENSITIVE_ATTRIBUTE);
-        data.getDefinition().setAttributeType("age", AttributeType.INSENSITIVE_ATTRIBUTE);          //insensitive because it is already an interval
+        data.getDefinition().setAttributeType("drivers_lic", AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
+        data.getDefinition().setAttributeType("age", AttributeType.INSENSITIVE_ATTRIBUTE);
         //set hierarchies for each quasi-identifier attribute
         data.getDefinition().setHierarchy("voter_stat", voterStatHierarchy);
         data.getDefinition().setHierarchy("zip_code", zipCodeHierarchy);
         data.getDefinition().setHierarchy("city", cityHierarchy);
+        data.getDefinition().setHierarchy("race_code",raceCodeHierarchy);
+        data.getDefinition().setHierarchy("ethnic_code",ethnicCodeHierarchy);
+        data.getDefinition().setHierarchy("party_cd",partyCdHierarchy);
+        data.getDefinition().setHierarchy("gender_code",genderCodeHierarchy);
         data.getDefinition().setHierarchy("birth_place",birthStateHierarchy);
+        data.getDefinition().setHierarchy("drivers_lic",driversLicHierarchy);
         return data;
     }
 
@@ -496,12 +506,6 @@ public class Example54 extends Example
         ARXConfiguration config = ARXConfiguration.create();
         config.addPrivacyModel(criterion);
         config.setMaxOutliers(maxOutliers);
-        // Privacy models that protect data from attribute disclosure, must be assigned to sensitive attributes
-        config.addCriterion(new EqualDistanceTCloseness("race_code",tValue));
-        config.addCriterion(new EqualDistanceTCloseness("ethnic_code",tValue));
-        config.addCriterion(new EqualDistanceTCloseness("party_cd",tValue));
-        config.addCriterion(new EqualDistanceTCloseness("gender_code",tValue));
-        config.addCriterion(new EqualDistanceTCloseness("drivers_lic",tValue));
         //get input metrics
         //getMetrics(data.getHandle(),populationModel,threshold);
         //anonymize input
